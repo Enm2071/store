@@ -1,95 +1,82 @@
 const express = require('express');
-const faker = require('faker');
+const ProductsServices = require('../services/product');
+const validatorHandler = require('../middlewares/validator.handler');
+const { createProductSchema, updateProductSchema, getProductSchema } = require('../schemas/product.schema');
 
 const router = express.Router();
-
-router.use((req, res, next) => {
-  console.log('req', req)
-  console.log('Time-products:', Date.now());
-  next();
-});
+const service = new ProductsServices();
 
 router.get('/', (req, res) => {
-  const products = [];
-  const { size } = req.query;
-  const limit = size || 10;
-  for (let i = 0; i < limit; i++) {
-    products.push({
-      id: faker.datatype.uuid(),
-      name: faker.commerce.productName(),
-      price: parseInt(faker.commerce.price(), 10),
-      image: faker.image.image(),
-      detail: faker.lorem.paragraph(),
+  res.json({
+    products: service.getProducts(),
+  });
+});
+
+
+router.get('/:id', validatorHandler(getProductSchema, 'params'),
+  (req, res) => {
+    const { id } = req.params;
+
+    res.json({
+      product: service.getProduct(id),
     });
-  }
-  res.json({
-    products,
   });
-});
 
+router.post('/',
+  validatorHandler(createProductSchema, 'body'),
+  (req, res) => {
+    const { body: product } = req;
 
-router.get('/:id', (req, res) => {
-  const { id } = req.params;
-  if (id === 'special') {
-    res.status(404).json({
-      message: 'Product not found',
+    const response = service.addProduct(product);
+
+    res.status(201).json({
+      message: 'Product created',
+      product: response,
     });
-    return;
+  });
+
+router.patch('/:id', (req, res, next) => {
+  const { id } = req.params;
+  const { body: product } = req;
+  try {
+    const response = service.patchProduct(id, product);
+
+    res.json({
+      message: 'Product updated',
+      product: response,
+    });
+  } catch (error) {
+    next(error);
   }
-  res.json({
-    product: {
-      id,
-      name: 'Product 1',
-      price: 100,
-    },
-  });
 });
 
-router.post('/', (req, res) => {
-  const { body: product } = req;
-  console.log('product', product);
-
-  res.status(201).json({
-    message: 'Product created',
-    product,
-  });
-});
-
-router.patch('/:id', (req, res) => {
+router.put('/:id', (req, res, next) => {
   const { id } = req.params;
   const { body: product } = req;
+  try {
+    const response = service.updateProduct(id, product);
 
-  res.json({
-    message: 'Product updated',
-    product: {
-      id,
-      ...product,
-    },
-  });
+    res.json({
+      message: 'Product replaced',
+      product: response,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.put('/:id', (req, res) => {
+router.delete('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { body: product } = req;
+  try {
+    const response = service.deleteProduct(id);
 
-  res.json({
-    message: 'Product replaced',
-    product: {
-      id,
-      ...product,
-    },
-  });
-});
-
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-
-  res.status.json({
-    message: 'Product deleted',
-    product: {
-      id,
-    },
-  });
+    res.json({
+      message: 'Product deleted',
+      product: response,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
