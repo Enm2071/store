@@ -35,7 +35,10 @@ router.post('/',
     });
   });
 
-router.patch('/:id', (req, res, next) => {
+router.patch('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  validatorHandler(updateProductSchema, 'body'),
+  (req, res, next) => {
   const { id } = req.params;
   const { body: product } = req;
   try {
@@ -50,7 +53,10 @@ router.patch('/:id', (req, res, next) => {
   }
 });
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id',
+  validatorHandler(getProductSchema, 'params'),
+  validatorHandler(updateProductSchema, 'body'),
+  (req, res, next) => {
   const { id } = req.params;
   const { body: product } = req;
   try {
