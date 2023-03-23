@@ -1,31 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const UserService = require('../services/user');
 
-router.use((req, res, next) => {
-  console.log('Time-users:', Date.now());
-  next();
-});
 
-router.get('/', (req, res) => {
-  const {limit, offset} = req.query;
-  if (limit && offset) {
-    res.json({
-      users: [
-        { id: 1, name: 'User 1' },
-        { id: 2, name: 'User 2' },
-        { id: 3, name: 'User 3' },
-      ],
-      limit,
-      offset,
-    });
-  } else {
-    res.json({
-      users: [
-        { id: 1, name: 'User 1' },
-        { id: 2, name: 'User 2' },
-      ],
-    });
-  }
+router.get('/', async (req, res) => {
+  const userService = new UserService();
+  const users = await userService.getUser();
+  res.json({
+    users
+  });
 });
 
 

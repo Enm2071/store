@@ -6,9 +6,9 @@ const { createProductSchema, updateProductSchema, getProductSchema } = require('
 const router = express.Router();
 const service = new ProductsServices();
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   res.json({
-    products: service.getProducts(),
+    products: await service.getProducts(),
   });
 });
 
