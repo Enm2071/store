@@ -2,7 +2,7 @@ const express = require('express');
 const routerApi = require('./routes');
 const cors = require('cors');
 const boom = require('@hapi/boom');
-const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler');
+const { errorHandler, boomErrorHandler } = require('./middlewares/error.handler');
 
 
 const app = express();
@@ -37,8 +37,6 @@ app.use((req, res, next) => {
   next(boom.notFound('Route not found'));
 });
 
-
-app.use(logErrors);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
