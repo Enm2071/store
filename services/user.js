@@ -5,12 +5,16 @@ class UserService {
   constructor() {}
 
   async getUsers() {
-    const users = await models.User.findAll();
+    const users = await models.User.findAll({
+      include: ['customer']
+    });
     return users;
   }
 
   async getUser(id) {
-    const user = await models.User.findByPk(id);
+    const user = await models.User.findByPk(id, {
+      include: ['customer']
+    });
     if (!user) {
       throw boom.notFound('User not found');
     }
@@ -19,7 +23,9 @@ class UserService {
 
   async createUser(user) {
     try {
-      const createdUser = await models.User.create(user);
+      const createdUser = await models.User.create(user, {
+        include: ['customer']
+      });
       return createdUser;
     } catch (error) {
       throw boom.badRequest(error);

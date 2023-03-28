@@ -1,88 +1,71 @@
 const boom = require('@hapi/boom');
-const faker = require('faker');
+const { models } = require('../libs/sequelize');
 
 
 class CategoryServices {
-  constructor() {
-    this.categories = [];
-    this.generate();
-  }
+  constructor() {}
 
-  generate(){
-    const limit = 100;
-    for (let i = 0; i < limit; i++) {
-      this.categories.push({
-        id: faker.datatype.uuid(),
-        name: faker.commerce.productName(),
-        detail: faker.lorem.paragraph(),
-        isBlocked: faker.datatype.boolean(),
+  async getCategories() {
+    try {
+      const categories = await models.Category.findAll({
+        include: ['products']
       });
+      return categories;
+    } catch (error) {
+      throw boom.batRequest(error);
     }
   }
 
-  getCategories() {
-    return this.categories;
+  async getCategory(id) {
+    try {
+      const category = await models.Category.findOne({
+        where: { id },
+        include: ['products']
+      });
+
+      if (!category) {
+        throw boom.notFound('Category not found');
+      }
+
+      return category;
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
   }
 
-  getCategory(id) {
-    const category = this.categories.find((category) => category.id === id);
-    if (!category) {
-      throw boom.notFound('Category not found');
-    }
+  async createCategory(data) {
+    try {
+      const newCategory = await models.Category.create(data);
 
-    if (category.isBlocked) {
-      throw boom.conflict('Category is blocked');
+      return newCategory;
+    } catch (error) {
+      throw boom.badRequest(error);
     }
-
-    return this.categories.find((category) => category.id === id);
   }
 
-  addCategory(category) {
-    const newCategory = {
-      id: faker.datatype.uuid(),
-      ...category,
-    };
+  async updateCategory(id, category) {
+    try {
+      const categoryToUpdate = await this.getCategory(id)
 
-    this.categories.push(newCategory);
+      const updatedCategory = await categoryToUpdate.update(category);
 
-    return newCategory;
+      return updatedCategory;
+
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
   }
 
-  updateCategory(id, category) {
-    const index = this.categories.findIndex((category) => category.id === id);
+  async deleteCategory(id) {
+    try {
+      const category = await this.getCategory(id);
 
-    if (index === -1) {
-      throw boom.notFound('Category not found');
+      const deletedCategory = await category.destroy();
+
+      return deletedCategory;
+    } catch (error) {
+      throw boom.badRequest(error);
     }
-
-    if (this.categories[index].isBlocked) {
-      throw boom.conflict('Category is blocked');
-    }
-
-    const updatedCategory = {
-      id,
-      ...category,
-    };
-
-    this.categories[index] = updatedCategory;
-
-    return updatedCategory;
-  }
-
-  deleteCategory(id) {
-    const index = this.categories.findIndex((category) => category.id === id);
-
-    if (index === -1) {
-      throw boom.notFound('Category not found');
-    }
-
-    if (this.categories[index].isBlocked) {
-      throw boom.conflict('Category is blocked');
-    }
-
-    this.categories.splice(index, 1);
-
-    return { id };
   }
 }
 

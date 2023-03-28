@@ -6,43 +6,46 @@ const { createCategorySchema, updateCategorySchema, getCategorySchema } = requir
 const service = new CategoriesServices();
 
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   res.json({
-    categories: service.getCategories(),
+    categories: await service.getCategories(),
   });
 });
 
 router.get('/:id',
   validatorHandler(getCategorySchema, 'params'),
-  (req, res) => {
+  async (req, res) => {
     const { id } = req.params;
 
     res.json({
-      category: service.getCategory(id),
+      category: await service.getCategory(id),
     });
   });
 
 router.post('/',
   validatorHandler(createCategorySchema, 'body'),
-  (req, res) => {
+  async (req, res, next) => {
     const { body: category } = req;
+    try {
+      const response = await service.createCategory(category);
 
-    const response = service.addCategory(category);
-
-    res.status(201).json({
-      message: 'Category created',
-      category: response,
-    });
+      res.json({
+        message: 'Category created',
+        category: response,
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 
 router.patch('/:id',
   validatorHandler(getCategorySchema, 'params'),
   validatorHandler(updateCategorySchema, 'body'),
-  (req, res, next) => {
+  async (req, res, next) => {
     const { id } = req.params;
     const { body: category } = req;
     try {
-      const response = service.patchCategory(id, category);
+      const response = await service.patchCategory(id, category);
 
       res.json({
         message: 'Category updated',
@@ -56,11 +59,11 @@ router.patch('/:id',
 router.put('/:id',
   validatorHandler(getCategorySchema, 'params'),
   validatorHandler(updateCategorySchema, 'body'),
-  (req, res, next) => {
+  async (req, res, next) => {
     const { id } = req.params;
     const { body: category } = req;
     try {
-      const response = service.updateCategory(id, category);
+      const response = await service.updateCategory(id, category);
 
       res.json({
         message: 'Category updated',

@@ -45,10 +45,10 @@ class UserModel extends Model {
   }
 
   static associate(models) {
-    // UserModel.hasMany(models.TaskModel, {
-    //   foreignKey: 'userId',
-    //   as: 'tasks',
-    // });
+    this.hasOne(models.Customer, {
+      foreignKey: 'userId',
+      as: 'customer'
+    });
   }
 
 

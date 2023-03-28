@@ -25,7 +25,7 @@ router.get('/:id',
 
 router.post('/',
   validatorHandler(createUserSchema, 'body'),
-  async (req, res) => {
+  async (req, res,) => {
   const userService = new UserService();
   const user = await userService.createUser(req.body);
   res.json({
