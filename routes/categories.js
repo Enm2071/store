@@ -14,12 +14,17 @@ router.get('/', async (req, res) => {
 
 router.get('/:id',
   validatorHandler(getCategorySchema, 'params'),
-  async (req, res) => {
+  async (req, res, next) => {
     const { id } = req.params;
+    try {
+      const response = await service.getCategory(id);
 
-    res.json({
-      category: await service.getCategory(id),
-    });
+      res.json({
+        category: response,
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 
 router.post('/',

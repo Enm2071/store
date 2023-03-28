@@ -6,33 +6,47 @@ const { createProductSchema, updateProductSchema, getProductSchema } = require('
 const router = express.Router();
 const service = new ProductsServices();
 
-router.get('/', async (req, res) => {
-  res.json({
-    products: await service.getProducts(),
-  });
+router.get('/', async (req, res, next) => {
+  try {
+    const response = await service.getProducts();
+
+    res.json({
+      products: response,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 
 router.get('/:id', validatorHandler(getProductSchema, 'params'),
-  (req, res) => {
-    const { id } = req.params;
+  (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const response = service.getProduct(id);
 
-    res.json({
-      product: service.getProduct(id),
-    });
+      res.json({
+        product: response,
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 
 router.post('/',
   validatorHandler(createProductSchema, 'body'),
-  (req, res) => {
-    const { body: product } = req;
+  (req, res, next) => {
+    try {
+      const { body: product } = req;
+      const response = service.createProduct(product);
 
-    const response = service.addProduct(product);
-
-    res.status(201).json({
-      message: 'Product created',
-      product: response,
-    });
+      res.json({
+        message: 'Product created',
+        product: response,
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 
 router.patch('/:id',
