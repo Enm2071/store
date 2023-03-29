@@ -7,9 +7,7 @@ class CategoryServices {
 
   async getCategories() {
     try {
-      const categories = await models.Category.findAll({
-        include: ['products']
-      });
+      const categories = await models.Category.findAll();
       return categories;
     } catch (error) {
       throw boom.batRequest(error);

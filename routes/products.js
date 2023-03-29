@@ -20,10 +20,10 @@ router.get('/', async (req, res, next) => {
 
 
 router.get('/:id', validatorHandler(getProductSchema, 'params'),
-  (req, res, next) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
-      const response = service.getProduct(id);
+      const response = await service.getProduct(id);
 
       res.json({
         product: response,
@@ -35,12 +35,12 @@ router.get('/:id', validatorHandler(getProductSchema, 'params'),
 
 router.post('/',
   validatorHandler(createProductSchema, 'body'),
-  (req, res, next) => {
+  async (req, res, next) => {
     try {
       const { body: product } = req;
-      const response = service.createProduct(product);
+      const response = await service.createProduct(product);
 
-      res.json({
+      res.status(201).json({
         message: 'Product created',
         product: response,
       });
@@ -52,11 +52,11 @@ router.post('/',
 router.patch('/:id',
   validatorHandler(getProductSchema, 'params'),
   validatorHandler(updateProductSchema, 'body'),
-  (req, res, next) => {
+  async (req, res, next) => {
   const { id } = req.params;
   const { body: product } = req;
   try {
-    const response = service.patchProduct(id, product);
+    const response = await service.patchProduct(id, product);
 
     res.json({
       message: 'Product updated',
@@ -70,11 +70,11 @@ router.patch('/:id',
 router.put('/:id',
   validatorHandler(getProductSchema, 'params'),
   validatorHandler(updateProductSchema, 'body'),
-  (req, res, next) => {
+  async (req, res, next) => {
   const { id } = req.params;
   const { body: product } = req;
   try {
-    const response = service.updateProduct(id, product);
+    const response = await service.updateProduct(id, product);
 
     res.json({
       message: 'Product replaced',
@@ -85,10 +85,10 @@ router.put('/:id',
   }
 });
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
-    const response = service.deleteProduct(id);
+    const response = await service.deleteProduct(id);
 
     res.json({
       message: 'Product deleted',

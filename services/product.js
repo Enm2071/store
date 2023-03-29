@@ -1,11 +1,10 @@
 const boom = require('@hapi/boom');
 const faker = require('faker');
-const sequelize = require('../libs/sequelize');
+const {models} = require('./../libs/sequelize');
 
 class ProductsServices {
   constructor() {
     this.products = [];
-    this.generate();
   }
 
   generate(){
@@ -23,82 +22,97 @@ class ProductsServices {
   }
 
   async getProducts() {
-    const query = 'SELECT * FROM public.tasks';
-    const [data] = await sequelize.query(query)
-    return data;
+    try {
+      const products = await models.Product.findAll({
+        include: ['category']
+      });
+      return products;
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
   }
 
-  getProduct(id) {
-    const product = this.products.find((product) => product.id === id);
-    if (!product) {
-      throw boom.notFound('Product not found');
-    }
+  async getProduct(id) {
+    try {
+      const product = await models.Product.findOne({
+        where: {
+          id,
+        }
+      }, {
+        include: ['category']
+      });
 
-    if (product.isBlocked) {
-      throw boom.conflict('Product is blocked');
+      if (!product) {
+        throw boom.notFound('Product not found');
+      }
+      return product;
+    } catch (error) {
+      throw boom.badRequest(error);
     }
-
-    return this.products.find((product) => product.id === id);
   }
 
-  addProduct(product) {
-    const newProduct = {
-      id: faker.datatype.uuid(),
-      ...product,
-    };
+  async createProduct(product) {
+    try {
+      const category = await models.Category.findOne({
+        where: {
+          id: product.categoryId,
+        },
+      });
 
-    this.products.push(newProduct);
+      if (!category) {
+        throw boom.notFound('Category not found');
+      }
 
-    return newProduct;
-  }
+      const productCreate = await models.Product.create(product);
 
-  updateProduct(id, product) {
-    const index = this.products.findIndex((product) => product.id === id);
-
-    if (index === -1) {
-      throw boom.notFound('Product not found');
+      return productCreate;
+    } catch (error) {
+      throw boom.badRequest(error);
     }
-
-    if (this.products[index].isBlocked) {
-      throw boom.conflict('Product is blocked');
-    }
-
-    this.products[index] = {
-      ...this.products[index],
-      ...product,
-    };
-
-    return this.products[index];
-  }
-
-  patchProduct(id, product) {
-    const index = this.products.findIndex((product) => product.id === id);
-
-    if (index === -1) {
-      throw boom.notFound('Product not found');
-    }
-
-    if (this.products[index].isBlocked) {
-      throw boom.conflict('Product is blocked');
-    }
-
-    this.products[index] = {
-      ...this.products[index],
-      ...product,
-    };
-
-    return this.products[index];
 
   }
 
-  deleteProduct(id) {
-    const index = this.products.findIndex((product) => product.id === id);
+  async updateProduct(id, product) {
+    try {
+      const productToUpdate = await this.getProduct(id);
 
-    if (index === -1) {
-      throw boom.notFound('Product not found');
+      await productToUpdate.update({
+        ...product,
+      });
+
+      return productUpdate;
+
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
+  }
+
+  async patchProduct(id, product) {
+    try {
+      const productToUpdate = await this.getProduct(id);
+
+      await productToUpdate.update({
+        ...product,
+      });
+
+      return productUpdate;
+
+    } catch (error) {
+      throw boom.badRequest(error);
     }
 
-    this.products.splice(index, 1);
+  }
+
+  async deleteProduct(id) {
+    try {
+      const productToDelete = await this.getProduct(id);
+
+      await productToDelete.destroy();
+
+      return productToDelete;
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
   }
 
 }

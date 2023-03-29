@@ -2,11 +2,11 @@ const express = require('express');
 const routerApi = require('./routes');
 const cors = require('cors');
 const boom = require('@hapi/boom');
-const { errorHandler, boomErrorHandler } = require('./middlewares/error.handler');
+const { errorHandler, boomErrorHandler, ormErrorHandler, logErrors } = require('./middlewares/error.handler');
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -17,6 +17,7 @@ app.use(express.json());
 // const whitelist = ['http://localhost:3000', 'http://localhost:8080'];
 // const corsOptions = {
 //   origin: (origin, callback) => {
+//     console.log('origin', origin, callback);
 //     if (whitelist.indexOf(origin) !== -1) {
 //       callback(null, true);
 //     } else {
@@ -37,6 +38,8 @@ app.use((req, res, next) => {
   next(boom.notFound('Route not found'));
 });
 
+app.use(logErrors);
+app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
