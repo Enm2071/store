@@ -14,7 +14,6 @@ function errorHandler (err, req, res, next) {
 
 function boomErrorHandler (err, req, res, next) {
   if (err.isBoom) {
-    console.log('entre aqui 3.1');
     const { output: { statusCode, payload } } = err;
     res.status(statusCode).json(payload);
   }
@@ -24,7 +23,6 @@ function boomErrorHandler (err, req, res, next) {
 
 function ormErrorHandler(err, req, res, next) {
   if (err instanceof ValidationError) {
-    console.log('entre aqui 4.1');
     res.status(409).json({
       statusCode: 409,
       message: err.name,

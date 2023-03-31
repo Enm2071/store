@@ -1,6 +1,7 @@
 const boom = require('@hapi/boom');
 const faker = require('faker');
 const {models} = require('./../libs/sequelize');
+const { Op }  = require('sequelize');
 
 class ProductsServices {
   constructor() {
@@ -21,11 +22,27 @@ class ProductsServices {
     }
   }
 
-  async getProducts() {
+  async getProducts(req) {
     try {
-      const products = await models.Product.findAll({
-        include: ['category']
-      });
+
+      const options = {
+        include: ['category'],
+        where: {},
+      }
+      const { limit, offset, filterBy, filterText } = req.query;
+      if (req.limit && req.offset) {
+        options.limit = limit;
+        options.offset = offset;
+      }
+
+      if (filterBy && filterText) {
+        options.where[filterBy] = {
+          [Op.like]: `%${filterText}%`,
+        }
+      }
+
+      const products = await models.Product.findAll(options);
+
       return products;
     } catch (error) {
       throw boom.badRequest(error);
