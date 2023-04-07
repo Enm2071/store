@@ -1,6 +1,6 @@
 const express = require('express');
 
-const OrderService = require('../services/order');
+const OrderService = require('../services/order.service');
 const validatorHandler = require('../middlewares/validator.handler');
 
 const {

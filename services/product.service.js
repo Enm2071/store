@@ -1,6 +1,6 @@
 const boom = require('@hapi/boom');
 const faker = require('faker');
-const {models} = require('./../libs/sequelize');
+const {models} = require('../libs/sequelize');
 const { Op }  = require('sequelize');
 
 class ProductsServices {

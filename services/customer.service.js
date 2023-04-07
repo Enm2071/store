@@ -1,9 +1,9 @@
-const {models} = require('../libs/sequelize');
+const { models } = require('../libs/sequelize');
 const boom = require('@hapi/boom');
-
+const { generateHash } = require('../utils/pass-hash');
 class CustomerServices {
 
-  constructor() {}
+  constructor() { }
 
   async getCustomers() {
     try {
@@ -45,7 +45,6 @@ class CustomerServices {
       const user = await models.User.findOne({
         where: {
           email,
-          password
         }
       });
 
@@ -53,7 +52,7 @@ class CustomerServices {
       if (!user) {
         const userCreate = await models.User.create({
           email,
-          password
+          password: await generateHash(password)
         });
         id = userCreate.id;
       }
@@ -64,7 +63,10 @@ class CustomerServices {
         phone: customer.phone,
         userId: id
       }
-      const newCustomer = await models.Customer.create(newCustomerData);
+      const newCustomer = await models.Customer.create(newCustomerData, {
+        include: ['user']
+      });
+
       return newCustomer;
     } catch (error) {
       throw boom.badRequest(error);
