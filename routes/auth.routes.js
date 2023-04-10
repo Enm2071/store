@@ -20,7 +20,9 @@ router.post('/sign-in',
         role: user.role,
         customerId: customer.id,
       };
-      const token = jwt.sign(payload, config.jwtSecret);
+      const token = jwt.sign(payload, config.jwtSecret, {
+        expiresIn: '15min',
+      });
       res.json({
         message: 'User logged in',
         user,
