@@ -35,6 +35,25 @@ class CustomerServices {
     }
   }
 
+  async getCustomerByUserId(userId) {
+    try {
+      const customer = await models.Customer.findOne({
+        where: {
+          userId,
+        }
+      }, {
+        include: ['user']
+      });
+
+      if (!customer) {
+        throw boom.notFound('Customer not found');
+      }
+      return customer;
+    } catch (error) {
+      throw boom.badRequest(error);
+    }
+  }
+
   async createCustomer(customer) {
     try {
       const { user: {

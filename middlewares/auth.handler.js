@@ -19,7 +19,7 @@ const checkAdminRole = (req, res, next) => {
   next();
 };
 
-const checkRoles = (...roles) => {
+const checkRoles = (roles) => {
   return (req, res, next) => {
     const user = req?.user;
     if (!user || !roles.includes(user.role)) {
