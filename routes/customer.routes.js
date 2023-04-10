@@ -1,6 +1,8 @@
 const express = require('express');
+const passport = require('passport');
 
 const CustomerService = require('../services/customer.service');
+const { checkRoles } = require('../middlewares/auth.handler');
 const validationHandler = require('../middlewares/validator.handler');
 const {
   createCustomerSchema,
@@ -11,24 +13,32 @@ const {
 const router = express.Router();
 const service = new CustomerService();
 
-router.get('/',  async (req, res, next) => {
-  try {
-    res.json(await service.getCustomers());
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin', 'customer']),
+  async (req, res, next) => {
+    try {
+      res.json(await service.getCustomers());
+    } catch (error) {
+      next(error);
+    }
+  });
 
-router.get('/:id', async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    res.json(await service.getCustomer(id));
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin', 'customer']),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      res.json(await service.getCustomer(id));
+    } catch (error) {
+      next(error);
+    }
+  });
 
 router.post('/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validationHandler(createCustomerSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -41,6 +51,8 @@ router.post('/',
 );
 
 router.patch('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validationHandler(getCustomerSchema, 'params'),
   validationHandler(updateCustomerSchema, 'body'),
   async (req, res, next) => {
@@ -55,6 +67,8 @@ router.patch('/:id',
 );
 
 router.delete('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validationHandler(getCustomerSchema, 'params'),
   async (req, res, next) => {
     try {

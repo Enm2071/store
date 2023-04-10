@@ -10,4 +10,28 @@ const checkApiKey = (req, res, next) => {
   next();
 }
 
-module.exports = checkApiKey;
+const checkAdminRole = (req, res, next) => {
+  const user = req?.user;
+  if (!user || user.role !== 'admin') {
+    next(boom.unauthorized('You are not authorized'));
+  }
+
+  next();
+};
+
+const checkRoles = (...roles) => {
+  return (req, res, next) => {
+    const user = req?.user;
+    if (!user || !roles.includes(user.role)) {
+      next(boom.unauthorized('You are not authorized'));
+    }
+
+    next();
+  }
+};
+
+module.exports = {
+  checkApiKey,
+  checkAdminRole,
+  checkRoles,
+};

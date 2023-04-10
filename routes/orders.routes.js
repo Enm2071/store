@@ -1,5 +1,7 @@
 const express = require('express');
+const passport = require('passport');
 
+const { checkRoles } = require('../middlewares/auth.handler');
 const OrderService = require('../services/order.service');
 const validatorHandler = require('../middlewares/validator.handler');
 
@@ -12,17 +14,22 @@ const {
 const router = express.Router();
 const service = new OrderService();
 
-router.get('/', async (req, res, next) => {
-  try {
-    const orders = await service.find();
-    res.json(orders);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin', 'customer']),
+  async (req, res, next) => {
+    try {
+      const orders = await service.find();
+      res.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 router.get(
   '/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin', 'customer']),
   validatorHandler(getOrderSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -38,6 +45,7 @@ router.get(
 router.post(
   '/',
   validatorHandler(createOrderSchema, 'body'),
+  checkRoles(['admin']),
   async (req, res, next) => {
     try {
       const body = req.body;
@@ -51,6 +59,8 @@ router.post(
 
 router.post(
   '/:id/item',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(getOrderSchema, 'params'),
   validatorHandler(addItemsSchema, 'body'),
   async (req, res, next) => {

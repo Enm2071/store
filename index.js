@@ -3,7 +3,7 @@ const routerApi = require('./routes');
 const cors = require('cors');
 const boom = require('@hapi/boom');
 const { errorHandler, boomErrorHandler, ormErrorHandler, logErrors } = require('./middlewares/error.handler');
-const checkApiKey = require('./middlewares/auth.handler');
+// const checkApiKey = require('./middlewares/auth.handler');
 
 
 const app = express();

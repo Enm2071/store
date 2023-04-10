@@ -1,22 +1,31 @@
 const express = require('express');
-const router = express.Router();
+const passport = require('passport');
+
+const { checkRoles } = require('../middlewares/auth.handler');
 const UserService = require('../services/user.service');
 const validatorHandler = require('../middlewares/validator.handler');
 const { createUserSchema, updateUserSchema, getUserSchema } = require('../schemas/user.schema');
+
+const router = express.Router();
 const userService = new UserService();
 
-router.get('/', async (req, res, next) => {
-  try {
-    const response = await userService.getUsers();
-    res.json({
-      users: response,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
+  async (req, res, next) => {
+    try {
+      const response = await userService.getUsers();
+      res.json({
+        users: response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
 
 router.get('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(getUserSchema, 'params'),
   async (req, res, next) => {
     try {
@@ -31,6 +40,8 @@ router.get('/:id',
   });
 
 router.post('/',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(createUserSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -46,6 +57,8 @@ router.post('/',
   });
 
 router.put('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(getUserSchema, 'params'),
   validatorHandler(updateUserSchema, 'body'),
   async (req, res, next) => {
@@ -61,6 +74,8 @@ router.put('/:id',
   });
 
 router.patch('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(getUserSchema, 'params'),
   validatorHandler(updateUserSchema, 'body'),
   async (req, res, next) => {
@@ -76,6 +91,8 @@ router.patch('/:id',
   });
 
 router.delete('/:id',
+  passport.authenticate('jwt', { session: false }),
+  checkRoles(['admin']),
   validatorHandler(getUserSchema, 'params'),
   async (req, res, next) => {
     try {
